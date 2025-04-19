@@ -8,19 +8,87 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            margin-top: 50px;
+            margin: 0;
+            padding: 0;
             background-image: url('img.png'); /* Путь к фото */
             background-size: cover; /* Адаптирует размер фото */
             background-repeat: no-repeat; /* Не повторяет фон */
             background-position: center; /* Центрирует фон */
             height: 100vh; /* Высота равна высоте экрана */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
-        h1 {
-            color: white; /* Текст будет белым для лучшей читаемости */
+
+        .button-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 колонки кнопок */
+            gap: 20px; /* Расстояние между кнопками */
+            width: 80%; /* Ширина контейнера */
+            max-width: 400px; /* Максимальная ширина */
+        }
+
+        .button {
+            background-color: rgba(255, 255, 255, 0.8); /* Полупрозрачный фон */
+            border: none;
+            border-radius: 8px; /* Закругление углов */
+            padding: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333; /* Цвет текста */
+            cursor: pointer;
+            transition: background-color 0.3s ease; /* Плавный переход */
+        }
+
+        .button:hover {
+            background-color: rgba(255, 255, 255, 1); /* Более яркий фон при наведении */
         }
     </style>
 </head>
 <body>
-    <h1>Добро пожаловать в Telegram Web App!</h1>
+    <!-- Контейнер для кнопок -->
+    <div class="button-container" id="button-container">
+        <button class="button">Карта 1</button>
+        <button class="button">Карта 2</button>
+        <button class="button">Карта 3</button>
+        <button class="button">Карта 4</button>
+        <button class="button">Карта 5</button>
+        <button class="button">Карта 6</button>
+        <button class="button">Карта 7</button>
+        <button class="button">Карта 8</button>
+    </div>
+
+    <script>
+        // Загружаем JSON-файл с данными карт
+        fetch('tarot_cards_full.json')
+            .then(response => response.json())
+            .then(data => {
+                const cards = Object.entries(data); // Преобразуем объект в массив
+                const selectedCards = getRandomCards(cards, 8); // Выбираем 8 случайных карт
+
+                // Привязываем карты к кнопкам
+                const buttons = document.querySelectorAll('.button');
+                buttons.forEach((button, index) => {
+                    button.dataset.cardTitle = selectedCards[index][1].title; // Сохраняем название карты
+                    button.addEventListener('click', handleButtonClick);
+                });
+
+                let clickCount = 0; // Счётчик кликов
+                function handleButtonClick(event) {
+                    if (clickCount < 3) {
+                        event.target.textContent = event.target.dataset.cardTitle; // Показываем название карты
+                        clickCount++;
+                    }
+                }
+            })
+            .catch(error => console.error('Ошибка загрузки JSON:', error));
+
+        // Функция для выбора случайных карт
+        function getRandomCards(cards, count) {
+            const shuffled = cards.sort(() => Math.random() - 0.5); // Перемешиваем массив
+            return shuffled.slice(0, count); // Возвращаем первые `count` элементов
+        }
+    </script>
 </body>
 </html>
