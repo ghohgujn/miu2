@@ -3,34 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web App</title>
+    <title>Telegram Web App</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            text-align: center;
+            margin-top: 50px;
+            background-image: url('img.png'); /* Путь к фото */
+            background-size: cover; /* Адаптирует размер фото */
+            background-repeat: no-repeat; /* Не повторяет фон */
+            background-position: center; /* Центрирует фон */
+            height: 100vh; /* Высота равна высоте экрана */
         }
-        input, button {
-            margin: 10px 0;
-            padding: 10px;
+        h1 {
+            color: white; /* Текст будет белым для лучшей читаемости */
         }
     </style>
 </head>
 <body>
-    <h1>Добро пожаловать в Web App!</h1>
-    <input type="text" id="message" placeholder="Введите сообщение...">
-    <button onclick="sendMessage()">Отправить в бот</button>
-
-    <script>
-        function sendMessage() {
-            const message = document.getElementById('message').value;
-            if (message) {
-                // Отправляем данные в бот через Telegram API
-                Telegram.WebApp.sendMessage(message);
-                Telegram.WebApp.close(); // Закрываем Web App
-            } else {
-                alert("Введите сообщение!");
-            }
-        }
-    </script>
+    <h1>Добро пожаловать в Telegram Web App!</h1>
 </body>
 </html>
