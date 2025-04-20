@@ -71,12 +71,34 @@
             background-repeat: no-repeat;
             background-position: center;
         }
+
+        /* Стили для отображения выбранных карт */
+        .selected-cards {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .selected-card {
+            width: 150px;
+            height: 200px;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
     <!-- Контейнер для карт -->
     <div class="card-container" id="card-container">
         <!-- Здесь будут создаваться карты с помощью JavaScript -->
+    </div>
+
+    <!-- Отображение выбранных карт -->
+    <div class="selected-cards" id="selected-cards">
+        <!-- Здесь будут добавляться выбранные карты -->
     </div>
 
     <script>
@@ -115,20 +137,24 @@
                 });
 
                 let clickCount = 0; // Счётчик кликов
+                const selectedCardsDiv = document.getElementById('selected-cards');
 
                 function handleCardClick(event) {
                     const card = event.currentTarget;
 
-                    if (!card.classList.contains('flipped')) {
+                    if (!card.classList.contains('flipped') && clickCount < 3) {
                         card.classList.add('flipped'); // Переворачиваем карту
-                        const cardTitle = card.dataset.cardTitle; // Получаем название карты
-                        alert(`Вы выбрали карту: ${cardTitle}`); // Выводим название карты
-                        clickCount++;
+                        const cardImageUrl = card.querySelector('.card-front').style.backgroundImage; // Получаем URL изображения карты
 
-                        // После выбора 3 карт выводится сообщение о завершении
-                        if (clickCount === 3) {
-                            alert('Вы выбрали все 3 карты!');
-                        }
+                        // Создаём элемент для отображения выбранной карты
+                        const selectedCard = document.createElement('div');
+                        selectedCard.classList.add('selected-card');
+                        selectedCard.style.backgroundImage = cardImageUrl;
+
+                        // Добавляем выбранную карту в контейнер
+                        selectedCardsDiv.appendChild(selectedCard);
+
+                        clickCount++;
                     }
                 }
             })
