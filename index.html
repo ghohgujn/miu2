@@ -5,11 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telegram Web App</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            margin: 0;
-            padding: 0;
             background-image: url('img.png'); /* Путь к фоновому изображению */
             background-size: cover; /* Адаптирует размер фото */
             background-repeat: no-repeat; /* Не повторяет фон */
@@ -19,6 +23,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            user-select: none; /* Отключаем выделение текста */
         }
 
         .card-container {
@@ -27,14 +32,18 @@
             gap: 20px; /* Расстояние между картами */
             width: 90%; /* Ширина контейнера */
             max-width: 600px; /* Максимальная ширина */
+            justify-items: center; /* Выравнивание по горизонтали */
+            align-items: center; /* Выравнивание по вертикали */
         }
 
         .card {
             width: 100%; /* Карты занимают всю ширину ячейки */
-            aspect-ratio: 2/3; /* Пропорции карты (например, 2:3) */
+            aspect-ratio: 1.85/3; /* Пропорции карты (например, 2:3) */
             position: relative;
             perspective: 1000px; /* Создаёт эффект 3D */
             cursor: pointer;
+            margin: 0; /* Убираем возможные маргины */
+            padding: 0; /* Убираем возможные паддинги */
         }
 
         .card-inner {
@@ -61,7 +70,7 @@
         .card-front {
             background-size: cover;
             background-repeat: no-repeat;
-            background-position: center;
+            background-position: center 61%; /* Сдвигаем изображение на 5% вверх */
             transform: rotateY(180deg); /* Лицевая сторона повернута на 180 градусов */
         }
 
@@ -71,34 +80,12 @@
             background-repeat: no-repeat;
             background-position: center;
         }
-
-        /* Стили для отображения выбранных карт */
-        .selected-cards {
-            margin-top: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .selected-card {
-            width: 150px;
-            height: 200px;
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-            border-radius: 8px;
-        }
     </style>
 </head>
 <body>
     <!-- Контейнер для карт -->
     <div class="card-container" id="card-container">
         <!-- Здесь будут создаваться карты с помощью JavaScript -->
-    </div>
-
-    <!-- Отображение выбранных карт -->
-    <div class="selected-cards" id="selected-cards">
-        <!-- Здесь будут добавляться выбранные карты -->
     </div>
 
     <script>
@@ -131,40 +118,28 @@
                     cardInner.appendChild(cardBack);
                     cardElement.appendChild(cardInner);
 
-                    cardElement.dataset.cardTitle = card[1].title; // Сохраняем название карты
                     cardElement.addEventListener('click', handleCardClick);
                     cardContainer.appendChild(cardElement);
                 });
 
                 let clickCount = 0; // Счётчик кликов
-                const selectedCardsDiv = document.getElementById('selected-cards');
 
                 function handleCardClick(event) {
                     const card = event.currentTarget;
 
                     if (!card.classList.contains('flipped') && clickCount < 3) {
                         card.classList.add('flipped'); // Переворачиваем карту
-                        const cardImageUrl = card.querySelector('.card-front').style.backgroundImage; // Получаем URL изображения карты
-
-                        // Создаём элемент для отображения выбранной карты
-                        const selectedCard = document.createElement('div');
-                        selectedCard.classList.add('selected-card');
-                        selectedCard.style.backgroundImage = cardImageUrl;
-
-                        // Добавляем выбранную карту в контейнер
-                        selectedCardsDiv.appendChild(selectedCard);
-
                         clickCount++;
                     }
                 }
+
+                // Функция для выбора случайных карт
+                function getRandomCards(cards, count) {
+                    const shuffled = cards.sort(() => Math.random() - 0.5); // Перемешиваем массив
+                    return shuffled.slice(0, count); // Возвращаем первые `count` элементов
+                }
             })
             .catch(error => console.error('Ошибка загрузки JSON:', error));
-
-        // Функция для выбора случайных карт
-        function getRandomCards(cards, count) {
-            const shuffled = cards.sort(() => Math.random() - 0.5); // Перемешиваем массив
-            return shuffled.slice(0, count); // Возвращаем первые `count` элементов
-        }
     </script>
 </body>
 </html>
