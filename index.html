@@ -45,6 +45,8 @@
             cursor: pointer;
             margin: 0; /* Убираем возможные маргины */
             padding: 0; /* Убираем возможные паддинги */
+            transition: box-shadow 0.3s ease; /* Плавное изменение свечения */
+            border-radius: 8px; /* Явное значение закругления углов */
         }
 
         .card-inner {
@@ -80,6 +82,12 @@
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
+        }
+
+        /* Класс для активного свечения */
+        .card-flipped-glow {
+            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8); /* Более широкое свечение */
+            border-radius: inherit; /* Наследование закругления углов */
         }
     </style>
 </head>
@@ -131,6 +139,11 @@
                     if (!card.classList.contains('flipped') && clickCount < 3) {
                         card.classList.add('flipped'); // Переворачиваем карту
                         clickCount++;
+
+                        // Добавляем свечение через 0.6 секунды (время анимации переворота)
+                        setTimeout(() => {
+                            card.classList.add('card-flipped-glow'); // Добавляем свечение
+                        }, 600);
                     }
                 }
 
