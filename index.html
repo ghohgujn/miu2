@@ -61,7 +61,7 @@
 
     <script>
         // Загружаем JSON-файл с данными карт
-        fetch('tarot_cards_full.json')
+        fetch('cards.json')
             .then(response => response.json())
             .then(data => {
                 const cards = Object.entries(data); // Преобразуем объект в массив
@@ -69,16 +69,27 @@
 
                 // Привязываем карты к кнопкам
                 const buttons = document.querySelectorAll('.button');
+                const chosenCards = []; // Массив для выбранных карт
+
                 buttons.forEach((button, index) => {
                     button.dataset.cardTitle = selectedCards[index][1].title; // Сохраняем название карты
                     button.addEventListener('click', handleButtonClick);
                 });
 
                 let clickCount = 0; // Счётчик кликов
+
                 function handleButtonClick(event) {
                     if (clickCount < 3) {
                         event.target.textContent = event.target.dataset.cardTitle; // Показываем название карты
+                        chosenCards.push(event.target.dataset.cardTitle); // Добавляем карту в массив
                         clickCount++;
+
+                        // Если выбрано 3 карты, отправляем их в Telegram
+                        if (clickCount === 3) {
+                            const telegramWebApp = window.Telegram.WebApp;
+                            telegramWebApp.sendData(chosenCards.join(', ')); // Отправляем данные в Telegram
+                            telegramWebApp.close(); // Закрываем веб-приложение
+                        }
                     }
                 }
             })
