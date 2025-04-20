@@ -14,16 +14,17 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            background-image: url('img.png'); /* Путь к фоновому изображению */
-            background-size: cover; /* Адаптирует размер фото */
-            background-repeat: no-repeat; /* Не повторяет фон */
-            background-position: center; /* Центрирует фон */
             height: 100vh; /* Высота равна высоте экрана */
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             user-select: none; /* Отключаем выделение текста */
+            overflow: hidden; /* Убираем прокрутку */
+            background-image: url('back.gif'); /* Гифка в качестве фона */
+            background-size: cover; /* Адаптирует размер фото */
+            background-repeat: no-repeat; /* Не повторяет фон */
+            background-position: center; /* Центрирует фон */
         }
 
         .card-container {
@@ -75,7 +76,7 @@
         }
 
         .card-back {
-            background-image: url('back.png'); /* Изображение рубашки карты */
+            background-image: url('back3.png'); /* Изображение рубашки карты */
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
