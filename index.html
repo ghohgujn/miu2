@@ -14,52 +14,65 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            height: 100vh; /* Высота равна высоте экрана */
+            height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            user-select: none; /* Отключаем выделение текста */
-            overflow: hidden; /* Убираем прокрутку */
-            background-image: url('back.gif'); /* Изображение в качестве фона */
-            background-size: cover; /* Адаптирует размер фото */
-            background-repeat: no-repeat; /* Не повторяет фон */
-            background-position: center; /* Центрирует фон */
+            user-select: none;
+            overflow: hidden;
+            background-image: url('back.gif');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .prompt {
+            color: white;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            transition: opacity 0.5s ease;
+        }
+
+        /* Анимация исчезновения надписи */
+        .prompt.fade-out {
+            opacity: 0;
         }
 
         .card-container {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); /* 4 колонки (по 4 карты в строке) */
-            gap: 20px; /* Расстояние между картами */
-            width: 90%; /* Ширина контейнера */
-            max-width: 600px; /* Максимальная ширина */
-            justify-items: center; /* Выравнивание по горизонтали */
-            align-items: center; /* Выравнивание по вертикали */
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            width: 90%;
+            max-width: 600px;
+            justify-items: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-wrapper {
+            width: 100%;
+            aspect-ratio: 1.85/3;
+            transition: opacity 0.3s ease;
+            position: relative;
         }
 
         .card {
-            width: 100%; /* Карты занимают всю ширину ячейки */
-            aspect-ratio: 1.85/3; /* Пропорции карты (например, 2:3) */
-            position: relative;
-            perspective: 1000px; /* Создаёт эффект 3D */
-            cursor: pointer;
-            margin: 0; /* Убираем возможные маргины */
-            padding: 0; /* Убираем возможные паддинги */
-            transition: box-shadow 0.3s ease; /* Плавное изменение свечения */
-            border-radius: 8px; /* Явное значение закругления углов */
-        }
-
-        .card-inner {
             width: 100%;
             height: 100%;
-            position: absolute;
-            transform-style: preserve-3d; /* Сохраняет 3D-пространство */
-            transition: transform 0.6s ease; /* Плавный переворот */
-            border-radius: 8px; /* Закругление углов */
+            position: relative;
+            perspective: 1000px;
+            cursor: pointer;
+            margin: 0;
+            padding: 0;
+            border-radius: 8px;
+            transform-style: preserve-3d;
+            transition: transform 0.6s ease, box-shadow 0.3s ease;
         }
 
-        .card.flipped .card-inner {
-            transform: rotateY(180deg); /* Переворачивает карту */
+        .card.flipped {
+            transform: rotateY(180deg);
         }
 
         .card-front,
@@ -67,91 +80,191 @@
             width: 100%;
             height: 100%;
             position: absolute;
-            backface-visibility: hidden; /* Скрывает обратную сторону при перевороте */
-            border-radius: 8px; /* Закругление углов */
-        }
-
-        .card-front {
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center 61%; /* Сдвигаем изображение на 5% вверх */
-            transform: rotateY(180deg); /* Лицевая сторона повернута на 180 градусов */
-        }
-
-        .card-back {
-            background-image: url('back3.png'); /* Изображение рубашки карты */
+            backface-visibility: hidden;
+            border-radius: 8px;
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
         }
 
-        /* Класс для активного свечения */
+        .card-front {
+            background-position: center 61%;
+            transform: rotateY(180deg);
+        }
+
+        .card-back {
+            background-image: url('back3.png');
+        }
+
         .card-flipped-glow {
-            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8); /* Более широкое свечение */
-            border-radius: 8px; /* Явное значение закругления углов */
+            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.7);
+        }
+
+        /* Анимация исчезновения невыбранных карт */
+        .fading-card {
+            opacity: 0 !important;
+            transition: opacity 0.5s ease-out;
+        }
+
+        /* Контейнер для выбранных карт */
+        .selected-row {
+            position: fixed;
+            top: 50%;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            z-index: 10;
+            padding: 0 20px;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .selected-card-wrapper {
+            width: calc((90vw - 50px) / 3);
+            aspect-ratio: 1.85/3;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Анимация перемещения карт */
+        .flying-card {
+            position: fixed;
+            z-index: 100;
+            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.4, 1);
+            transform-origin: center;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
-    <!-- Контейнер для карт -->
-    <div class="card-container" id="card-container">
-        <!-- Здесь будут создаваться карты с помощью JavaScript -->
-    </div>
+    <div class="prompt" id="prompt">Выберите 3 карты</div>
+    <div class="card-container" id="card-container"></div>
+    <div class="selected-row" id="selected-row"></div>
 
     <script>
-        // Загружаем JSON-файл с данными карт
         fetch('tarot_cards_full.json')
             .then(response => response.json())
             .then(data => {
-                const cards = Object.entries(data); // Преобразуем объект в массив
-                const selectedCards = getRandomCards(cards, 8); // Выбираем 8 случайных карт
-
-                // Создаём контейнер для карт
+                const cards = Object.entries(data);
+                const selectedCards = getRandomCards(cards, 8);
                 const cardContainer = document.getElementById('card-container');
+                const selectedRow = document.getElementById('selected-row');
+                const promptElement = document.getElementById('prompt');
+                let clickCount = 0;
+                const selectedCardsList = [];
+
+                // Создаем обертки для выбранных карт
+                for (let i = 0; i < 3; i++) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'selected-card-wrapper';
+                    wrapper.dataset.index = i;
+                    selectedRow.appendChild(wrapper);
+                }
 
                 // Добавляем карты в контейнер
                 selectedCards.forEach((card, index) => {
-                    const cardElement = document.createElement('div');
-                    cardElement.classList.add('card');
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'card-wrapper';
+                    wrapper.style.opacity = '1';
 
-                    const cardInner = document.createElement('div');
-                    cardInner.classList.add('card-inner');
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'card';
+                    cardElement.dataset.index = index;
 
                     const cardFront = document.createElement('div');
-                    cardFront.classList.add('card-front');
-                    cardFront.style.backgroundImage = `url('${card[0]}')`; // Устанавливаем лицевую сторону
+                    cardFront.className = 'card-front';
+                    cardFront.style.backgroundImage = `url('${card[0]}')`;
 
                     const cardBack = document.createElement('div');
-                    cardBack.classList.add('card-back');
+                    cardBack.className = 'card-back';
 
-                    cardInner.appendChild(cardFront);
-                    cardInner.appendChild(cardBack);
-                    cardElement.appendChild(cardInner);
+                    cardElement.appendChild(cardFront);
+                    cardElement.appendChild(cardBack);
+                    wrapper.appendChild(cardElement);
+                    cardContainer.appendChild(wrapper);
 
-                    cardElement.addEventListener('click', handleCardClick);
-                    cardContainer.appendChild(cardElement);
+                    // Обработчик клика на обертку карты
+                    wrapper.addEventListener('click', () => handleCardClick(cardElement, wrapper));
                 });
 
-                let clickCount = 0; // Счётчик кликов
-
-                function handleCardClick(event) {
-                    const card = event.currentTarget;
-
+                function handleCardClick(card, wrapper) {
                     if (!card.classList.contains('flipped') && clickCount < 3) {
-                        card.classList.add('flipped'); // Переворачиваем карт
+                        card.classList.add('flipped');
                         clickCount++;
 
-                        // Добавляем свечение через 0.6 секунды (время анимации переворота)
                         setTimeout(() => {
-                            card.classList.add('card-flipped-glow'); // Добавляем свечение
-                        }, 600);
+                            card.classList.add('card-flipped-glow');
+                        }, 300);
+
+                        selectedCardsList.push({card, wrapper});
+
+                        if (clickCount === 3) {
+                            // Плавно скрываем надпись
+                            promptElement.classList.add('fade-out');
+
+                            setTimeout(() => {
+                                moveSelectedCards(selectedCardsList);
+                            }, 500);
+                        }
                     }
                 }
 
-                // Функция для выбора случайных карт
+                function moveSelectedCards(cards) {
+                    // Скрываем невыбранные карты
+                    const allWrappers = document.querySelectorAll('.card-wrapper');
+                    allWrappers.forEach(wrapper => {
+                        if (!cards.some(c => c.wrapper === wrapper)) {
+                            wrapper.style.opacity = '0';
+                        }
+                    });
+
+                    // Анимируем перемещение выбранных карт
+                    const targetWrappers = document.querySelectorAll('.selected-card-wrapper');
+
+                    cards.forEach(({card, wrapper}, index) => {
+                        const targetWrapper = targetWrappers[index];
+                        const cardRect = card.getBoundingClientRect();
+                        const targetRect = targetWrapper.getBoundingClientRect();
+
+                        // Клонируем карту для анимации
+                        const flyingCard = card.cloneNode(true);
+                        flyingCard.className = 'card flipped card-flipped-glow flying-card';
+                        flyingCard.style.width = `${cardRect.width}px`;
+                        flyingCard.style.height = `${cardRect.height}px`;
+                        flyingCard.style.left = `${cardRect.left}px`;
+                        flyingCard.style.top = `${cardRect.top}px`;
+                        document.body.appendChild(flyingCard);
+
+                        // Сразу подготавливаем целевую позицию
+                        targetWrapper.innerHTML = '';
+                        const finalCard = card.cloneNode(true);
+                        finalCard.className = 'card flipped card-flipped-glow';
+                        targetWrapper.appendChild(finalCard);
+                        targetWrapper.style.opacity = '1';
+
+                        // Анимируем перемещение
+                        setTimeout(() => {
+                            flyingCard.style.left = `${targetRect.left}px`;
+                            flyingCard.style.top = `${targetRect.top}px`;
+                            flyingCard.style.width = `${targetRect.width}px`;
+                            flyingCard.style.height = `${targetRect.height}px`;
+
+                            // Удаляем летающую карту после анимации
+                            setTimeout(() => {
+                                flyingCard.remove();
+                            }, 800);
+                        }, 10);
+
+                        // Скрываем оригинальную карту
+                        wrapper.style.opacity = '0';
+                    });
+                }
+
                 function getRandomCards(cards, count) {
-                    const shuffled = cards.sort(() => Math.random() - 0.5); // Перемешиваем массив
-                    return shuffled.slice(0, count); // Возвращаем первые `count` элементов
+                    const shuffled = cards.sort(() => Math.random() - 0.5);
+                    return shuffled.slice(0, count);
                 }
             })
             .catch(error => console.error('Ошибка загрузки JSON:', error));
