@@ -21,7 +21,7 @@
             align-items: center;
             user-select: none; /* Отключаем выделение текста */
             overflow: hidden; /* Убираем прокрутку */
-            background-image: url('back.gif'); /* Гифка в качестве фона */
+            background-image: url('back.gif'); /* Изображение в качестве фона */
             background-size: cover; /* Адаптирует размер фото */
             background-repeat: no-repeat; /* Не повторяет фон */
             background-position: center; /* Центрирует фон */
@@ -55,6 +55,7 @@
             position: absolute;
             transform-style: preserve-3d; /* Сохраняет 3D-пространство */
             transition: transform 0.6s ease; /* Плавный переворот */
+            border-radius: 8px; /* Закругление углов */
         }
 
         .card.flipped .card-inner {
@@ -87,7 +88,7 @@
         /* Класс для активного свечения */
         .card-flipped-glow {
             box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8); /* Более широкое свечение */
-            border-radius: inherit; /* Наследование закругления углов */
+            border-radius: 8px; /* Явное значение закругления углов */
         }
     </style>
 </head>
@@ -137,7 +138,7 @@
                     const card = event.currentTarget;
 
                     if (!card.classList.contains('flipped') && clickCount < 3) {
-                        card.classList.add('flipped'); // Переворачиваем карту
+                        card.classList.add('flipped'); // Переворачиваем карт
                         clickCount++;
 
                         // Добавляем свечение через 0.6 секунды (время анимации переворота)
