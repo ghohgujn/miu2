@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Гадание на картах Таро</title>
     <style>
         /* Базовые сбросы стилей */
@@ -215,6 +215,9 @@
                 this.clickCount = 0;
                 this.selectedCardsList = [];
                 this.animationCompleteCount = 0;
+
+                // Добавлено: флаг для отслеживания статуса расширения
+                this.isExpanded = false;
             }
 
             /**
@@ -223,13 +226,44 @@
             init() {
                 // 1. Инициализация Telegram WebApp (должна быть первой)
                 if (window.Telegram?.WebApp) {
-                    Telegram.WebApp.expand(); // Основной метод для раскрытия на весь экран
+                    this.initTelegramFullscreen();
                 }
 
                 // 2. Инициализация компонентов приложения
                 this.setupSelectedCardSlots();
                 this.renderCards();
                 this.setupButtonHandler();
+            }
+
+            /**
+             * Инициализация полноэкранного режима Telegram WebApp
+             * Добавлено: новый метод для обработки расширения
+             */
+            initTelegramFullscreen() {
+                try {
+                    // Первичное расширение
+                    Telegram.WebApp.ready();
+                    Telegram.WebApp.expand();
+                    this.isExpanded = true;
+
+                    // Резервное расширение через 500 мс
+                    setTimeout(() => {
+                        if (!Telegram.WebApp.isExpanded) {
+                            Telegram.WebApp.expand();
+                            this.isExpanded = true;
+                        }
+                    }, 500);
+
+                    // Обработчик изменений размера
+                    Telegram.WebApp.onEvent('viewportChanged', () => {
+                        if (!this.isExpanded) {
+                            Telegram.WebApp.expand();
+                            this.isExpanded = true;
+                        }
+                    });
+                } catch (e) {
+                    console.error('Ошибка расширения WebApp:', e);
+                }
             }
 
             /**
