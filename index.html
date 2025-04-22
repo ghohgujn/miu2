@@ -128,11 +128,11 @@
             transition: opacity 0.3s ease;
         }
 
-        /* Анимация перемещения карт */
+        /* Анимация перемещения карт (редачить) */
         .flying-card {
             position: fixed;
             z-index: 100;
-            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.4, 1);
+            transition: all 1.12s cubic-bezier(0,1.08,.9,1.11); /* https://cubic-bezier.com/#.2,.8,.4,1 /*
             transform-origin: center;
             pointer-events: none;
         }
@@ -220,15 +220,20 @@
                         }
                     });
 
-                    // Анимируем перемещение выбранных карт
                     const targetWrappers = document.querySelectorAll('.selected-card-wrapper');
+
+                    // Сначала скрываем все целевые позиции
+                    targetWrappers.forEach(wrapper => {
+                        wrapper.style.opacity = '0';
+                        wrapper.innerHTML = '';
+                    });
 
                     cards.forEach(({card, wrapper}, index) => {
                         const targetWrapper = targetWrappers[index];
                         const cardRect = card.getBoundingClientRect();
                         const targetRect = targetWrapper.getBoundingClientRect();
 
-                        // Клонируем карту для анимации
+                        // Создаем летающую карту
                         const flyingCard = card.cloneNode(true);
                         flyingCard.className = 'card flipped card-flipped-glow flying-card';
                         flyingCard.style.width = `${cardRect.width}px`;
@@ -237,27 +242,28 @@
                         flyingCard.style.top = `${cardRect.top}px`;
                         document.body.appendChild(flyingCard);
 
-                        // Сразу подготавливаем целевую позицию
-                        targetWrapper.innerHTML = '';
-                        const finalCard = card.cloneNode(true);
-                        finalCard.className = 'card flipped card-flipped-glow';
-                        targetWrapper.appendChild(finalCard);
-                        targetWrapper.style.opacity = '1';
+                        // Скрываем оригинальную карту
+                        wrapper.style.opacity = '0';
 
-                        // Анимируем перемещение
+                        // Анимация движения
                         setTimeout(() => {
                             flyingCard.style.left = `${targetRect.left}px`;
                             flyingCard.style.top = `${targetRect.top}px`;
                             flyingCard.style.width = `${targetRect.width}px`;
                             flyingCard.style.height = `${targetRect.height}px`;
 
-                            // Удаляем летающую карту после анимации
+                            // После завершения анимации
                             setTimeout(() => {
+                                // Удаляем летающую карту
                                 flyingCard.remove();
-                            }, 800);
-                        }, 10);
 
-                        // Скрываем оригинальную карту
+                                // Создаем финальную карту в целевом положении
+                                const finalCard = card.cloneNode(true);
+                                finalCard.className = 'card flipped card-flipped-glow';
+                                targetWrapper.appendChild(finalCard);
+                                targetWrapper.style.opacity = '1';
+                            }, 5000); // Должно совпадать с длительностью анимации
+                        }, 100);
                         wrapper.style.opacity = '0';
                     });
                 }
