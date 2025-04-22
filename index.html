@@ -23,7 +23,7 @@
             align-items: center;
             user-select: none;
             overflow: hidden;
-            background-image: url('back.gif');
+            background-image: url('card/back.gif');
             background-size: cover;
             background-position: center;
         }
@@ -88,7 +88,7 @@
             transform: rotateY(180deg);
         }
         .card-back {
-            background-image: url('back3.png');
+            background-image: url('card/back3.png');
         }
 
         /* Свечение выбранной карты */
@@ -192,7 +192,7 @@
          * Инициализация приложения
          */
         function initTarotApp() {
-            fetch('tarot_cards_full.json')
+            fetch('card/cards_path.json')
                 .then(response => response.json())
                 .then(data => {
                     const app = new TarotApp(data);
@@ -224,7 +224,11 @@
                 this.setupSelectedCardSlots();
                 this.renderCards();
                 this.setupButtonHandler();
+                if (window.Telegram && window.Telegram.WebApp) {
+                    Telegram.WebApp.expand(); // Раскрываем на весь экран
+                    Telegram.WebApp.enableClosingConfirmation(); // Опционально: включить подтверждение закрытия
             }
+        }
 
             /**
              * Создает слоты для выбранных карт
