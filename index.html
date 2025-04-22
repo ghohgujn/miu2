@@ -221,14 +221,16 @@
              * Инициализация приложения
              */
             init() {
+                // 1. Инициализация Telegram WebApp (должна быть первой)
+                if (window.Telegram?.WebApp) {
+                    Telegram.WebApp.expand(); // Основной метод для раскрытия на весь экран
+                }
+
+                // 2. Инициализация компонентов приложения
                 this.setupSelectedCardSlots();
                 this.renderCards();
                 this.setupButtonHandler();
-                if (window.Telegram && window.Telegram.WebApp) {
-                    Telegram.WebApp.expand(); // Раскрываем на весь экран
-                    Telegram.WebApp.enableClosingConfirmation(); // Опционально: включить подтверждение закрытия
             }
-        }
 
             /**
              * Создает слоты для выбранных карт
