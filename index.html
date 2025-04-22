@@ -2,21 +2,21 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <!-- Обновленный viewport для Telegram WebApp -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Гадание на картах Таро</title>
     <style>
-        /* Базовые сбросы стилей */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* Добавленные CSS переменные для Telegram */
+        :root {
+            --tg-viewport-height: 100vh;
+            --tg-viewport-stable-height: 100vh;
         }
 
-        /* Основные стили страницы */
+        /* Обновленные стили body */
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            height: 100vh;
+            height: var(--tg-viewport-stable-height);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -26,6 +26,8 @@
             background-image: url('card/back.gif');
             background-size: cover;
             background-position: center;
+            margin: 0;
+            padding: 0;
         }
 
         /* Стили для текстовой подсказки */
@@ -218,6 +220,7 @@
 
                 // Добавлено: флаг для отслеживания статуса расширения
                 this.isExpanded = false;
+                this.viewportStableHeight = window.innerHeight;
             }
 
             /**
@@ -226,44 +229,86 @@
             init() {
                 // 1. Инициализация Telegram WebApp (должна быть первой)
                 if (window.Telegram?.WebApp) {
-                    this.initTelegramFullscreen();
+                    this.initTelegramWebApp();
+                } else {
+                    // Фолбэк для обычного браузера
+                    window.addEventListener('resize', this.updateViewport.bind(this));
                 }
 
-                // 2. Инициализация компонентов приложения
+                // 2. Инициализация компонентов приложения (без изменений)
                 this.setupSelectedCardSlots();
                 this.renderCards();
                 this.setupButtonHandler();
             }
 
             /**
-             * Инициализация полноэкранного режима Telegram WebApp
-             * Добавлено: новый метод для обработки расширения
+             * Инициализация Telegram WebApp (обновленный метод)
              */
-            initTelegramFullscreen() {
+            initTelegramWebApp() {
                 try {
-                    // Первичное расширение
                     Telegram.WebApp.ready();
-                    Telegram.WebApp.expand();
-                    this.isExpanded = true;
 
-                    // Резервное расширение через 500 мс
-                    setTimeout(() => {
-                        if (!Telegram.WebApp.isExpanded) {
-                            Telegram.WebApp.expand();
-                            this.isExpanded = true;
+                    // Первичное расширение
+                    this.expandWebApp();
+
+                    // Сохраняем начальную высоту
+                    this.viewportStableHeight = Telegram.WebApp.viewportStableHeight;
+                    this.updateViewport();
+
+                    // Обработчик изменений viewport
+                    Telegram.WebApp.onEvent('viewportChanged', (event) => {
+                        if (event.isStateStable) {
+                            this.viewportStableHeight = Telegram.WebApp.viewportStableHeight;
+                            this.updateViewport();
                         }
-                    }, 500);
 
-                    // Обработчик изменений размера
-                    Telegram.WebApp.onEvent('viewportChanged', () => {
-                        if (!this.isExpanded) {
-                            Telegram.WebApp.expand();
-                            this.isExpanded = true;
+                        // Если свернули - пытаемся снова развернуть
+                        if (!Telegram.WebApp.isExpanded) {
+                            this.expandWebApp();
                         }
                     });
+
+                    // Дополнительная проверка через секунду
+                    setTimeout(() => {
+                        if (!Telegram.WebApp.isExpanded) {
+                            this.expandWebApp();
+                        }
+                        this.updateViewport();
+                    }, 1000);
+
                 } catch (e) {
-                    console.error('Ошибка расширения WebApp:', e);
+                    console.error('Ошибка инициализации WebApp:', e);
                 }
+            }
+
+            /**
+             * Безопасное расширение WebApp
+             */
+            expandWebApp() {
+                if (Telegram.WebApp && !Telegram.WebApp.isExpanded) {
+                    try {
+                        Telegram.WebApp.expand();
+                        this.isExpanded = true;
+                    } catch (e) {
+                        console.warn('Не удалось развернуть WebApp:', e);
+                    }
+                }
+            }
+
+            /**
+             * Обновление размеров viewport
+             */
+            updateViewport() {
+                if (window.Telegram?.WebApp) {
+                    this.viewportStableHeight = Telegram.WebApp.viewportStableHeight;
+                } else {
+                    this.viewportStableHeight = window.innerHeight;
+                }
+
+                document.documentElement.style.setProperty(
+                    '--tg-viewport-stable-height',
+                    `${this.viewportStableHeight}px`
+                );
             }
 
             /**
