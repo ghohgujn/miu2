@@ -1,16 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Web App</title>
+    <title>Гадание на картах Таро</title>
     <style>
+        /* Базовые сбросы стилей */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        /* Основные стили страницы */
         body {
             font-family: Arial, sans-serif;
             text-align: center;
@@ -23,10 +25,10 @@
             overflow: hidden;
             background-image: url('back.gif');
             background-size: cover;
-            background-repeat: no-repeat;
             background-position: center;
         }
 
+        /* Стили для текстовой подсказки */
         .prompt {
             color: white;
             font-size: 24px;
@@ -34,79 +36,67 @@
             text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
             transition: opacity 0.5s ease;
         }
-
-        /* Анимация исчезновения <н</н>адписи */
         .prompt.fade-out {
             opacity: 0;
         }
 
+        /* Контейнер для карт */
         .card-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 15px;
             width: 90%;
             max-width: 600px;
-            justify-items: center;
-            align-items: center;
             margin-bottom: 20px;
         }
 
+        /* Обертка для карты */
         .card-wrapper {
             width: 100%;
-            aspect-ratio: 1.85/3;
+            aspect-ratio: 1.85/3; /* Соотношение сторон карты */
             transition: opacity 0.3s ease;
-            position: relative;
         }
 
+        /* Стили самой карты */
         .card {
             width: 100%;
             height: 100%;
             position: relative;
             perspective: 1000px;
             cursor: pointer;
-            margin: 0;
-            padding: 0;
             border-radius: 8px;
             transform-style: preserve-3d;
             transition: transform 0.6s ease, box-shadow 0.3s ease;
         }
-
         .card.flipped {
             transform: rotateY(180deg);
         }
 
+        /* Стороны карты (лицевая и обратная) */
         .card-front,
         .card-back {
+            position: absolute;
             width: 100%;
             height: 100%;
-            position: absolute;
             backface-visibility: hidden;
             border-radius: 8px;
             background-size: cover;
-            background-repeat: no-repeat;
             background-position: center;
         }
-
         .card-front {
             background-position: center 61%;
             transform: rotateY(180deg);
         }
-
         .card-back {
             background-image: url('back3.png');
         }
 
+        /* Свечение выбранной карты */
         .card-flipped-glow {
             box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.7);
         }
 
-        /* Анимация исчезновения невыбранных карт */
-        .fading-card {
-            opacity: 0 !important;
-            transition: opacity 0.5s ease-out;
-        }
-
-        /* Контейнер для выбранных карт */
+        /* Ряд для выбранных карт */
         .selected-row {
             position: fixed;
             top: 50%;
@@ -121,6 +111,7 @@
             pointer-events: none;
         }
 
+        /* Обертка для выбранной карты */
         .selected-card-wrapper {
             width: calc((90vw - 50px) / 3);
             aspect-ratio: 1.85/3;
@@ -128,152 +119,338 @@
             transition: opacity 0.3s ease;
         }
 
-        /* Анимация перемещения карт (редачить) */
+        /* Анимация перемещения карты */
         .flying-card {
             position: fixed;
             z-index: 100;
-            transition: all 1s cubic-bezier(.8,.86,.4,1); /* https://cubic-bezier.com/#.2,.8,.4,1 /*
-            transform-origin: center;
+            transition: all 1s cubic-bezier(.8,.86,.4,1);
             pointer-events: none;
+        }
+
+        /* Стили кнопки */
+        .bubbly-button {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            display: inline-block;
+            font-size: 1.2em;
+            padding: 10px 20px;
+            margin-top: 30px;
+            background-color: #555;
+            color: #fff;
+            border-radius: 15px;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.5s ease;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.7);
+            opacity: 0;
+            transform: translateY(20px);
+            z-index: 20;
+        }
+        .bubbly-button.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .bubbly-button:active {
+            transform: scale(0.95);
+            background-color: #444;
+        }
+        .bubbly-button.animate {
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Анимация пульсации кнопки */
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.7); }
+            50% { box-shadow: 0 0 25px rgba(255, 255, 255, 0.9); }
         }
     </style>
 </head>
 <body>
+    <!-- Элементы интерфейса -->
     <div class="prompt" id="prompt">Выберите 3 карты</div>
     <div class="card-container" id="card-container"></div>
     <div class="selected-row" id="selected-row"></div>
+    <button class="bubbly-button" id="fateButton">🔮Узнать предначертанное🔮</button>
 
     <script>
-        fetch('tarot_cards_full.json')
-            .then(response => response.json())
-            .then(data => {
-                const cards = Object.entries(data);
-                const selectedCards = getRandomCards(cards, 8);
-                const cardContainer = document.getElementById('card-container');
-                const selectedRow = document.getElementById('selected-row');
-                const promptElement = document.getElementById('prompt');
-                let clickCount = 0;
-                const selectedCardsList = [];
+        // Конфигурация приложения
+        const CONFIG = {
+            TOTAL_CARDS: 8,       // Всего карт для выбора
+            SELECT_CARDS: 3,      // Сколько карт нужно выбрать
+            FLIP_DELAY: 300,      // Задержка перед свечением карты (мс)
+            PROMPT_FADE_DELAY: 500, // Задержка перед исчезновением подсказки (мс)
+            CARD_MOVE_DELAY: 100,  // Задержка перед началом движения карты (мс)
+            BUTTON_SHOW_DELAY: 300 // Задержка перед показом кнопки (мс)
+        };
 
-                // Создаем обертки для выбранных карт
-                for (let i = 0; i < 3; i++) {
+        // Основная функция инициализации
+        document.addEventListener('DOMContentLoaded', () => {
+            initTarotApp();
+        });
+
+        /**
+         * Инициализация приложения
+         */
+        function initTarotApp() {
+            fetch('tarot_cards_full.json')
+                .then(response => response.json())
+                .then(data => {
+                    const app = new TarotApp(data);
+                    app.init();
+                })
+                .catch(error => console.error('Ошибка загрузки карт:', error));
+        }
+
+        /**
+         * Класс приложения Таро
+         */
+        class TarotApp {
+            constructor(cardsData) {
+                this.cardsData = Object.entries(cardsData);
+                this.cardContainer = document.getElementById('card-container');
+                this.selectedRow = document.getElementById('selected-row');
+                this.promptElement = document.getElementById('prompt');
+                this.fateButton = document.getElementById('fateButton');
+
+                this.clickCount = 0;
+                this.selectedCardsList = [];
+                this.animationCompleteCount = 0;
+            }
+
+            /**
+             * Инициализация приложения
+             */
+            init() {
+                this.setupSelectedCardSlots();
+                this.renderCards();
+                this.setupButtonHandler();
+            }
+
+            /**
+             * Создает слоты для выбранных карт
+             */
+            setupSelectedCardSlots() {
+                for (let i = 0; i < CONFIG.SELECT_CARDS; i++) {
                     const wrapper = document.createElement('div');
                     wrapper.className = 'selected-card-wrapper';
                     wrapper.dataset.index = i;
-                    selectedRow.appendChild(wrapper);
+                    this.selectedRow.appendChild(wrapper);
                 }
+            }
 
-                // Добавляем карты в контейнер
+            /**
+             * Рендерит карты на странице
+             */
+            renderCards() {
+                const selectedCards = this.getRandomCards(this.cardsData, CONFIG.TOTAL_CARDS);
+
                 selectedCards.forEach((card, index) => {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'card-wrapper';
-                    wrapper.style.opacity = '1';
-
-                    const cardElement = document.createElement('div');
-                    cardElement.className = 'card';
-                    cardElement.dataset.index = index;
-
-                    const cardFront = document.createElement('div');
-                    cardFront.className = 'card-front';
-                    cardFront.style.backgroundImage = `url('${card[0]}')`;
-
-                    const cardBack = document.createElement('div');
-                    cardBack.className = 'card-back';
+                    const wrapper = this.createCardWrapper();
+                    const cardElement = this.createCardElement(index);
+                    const cardFront = this.createCardFront(card[0]);
+                    const cardBack = this.createCardBack();
 
                     cardElement.appendChild(cardFront);
                     cardElement.appendChild(cardBack);
                     wrapper.appendChild(cardElement);
-                    cardContainer.appendChild(wrapper);
+                    this.cardContainer.appendChild(wrapper);
 
-                    // Обработчик клика на обертку карты
-                    wrapper.addEventListener('click', () => handleCardClick(cardElement, wrapper));
+                    // Обработчик клика на карту
+                    wrapper.addEventListener('click', () => this.handleCardClick(cardElement, wrapper));
                 });
+            }
 
-                function handleCardClick(card, wrapper) {
-                    if (!card.classList.contains('flipped') && clickCount < 3) {
-                        card.classList.add('flipped');
-                        clickCount++;
+            /**
+             * Создает обертку для карты
+             */
+            createCardWrapper() {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'card-wrapper';
+                wrapper.style.opacity = '1';
+                return wrapper;
+            }
 
+            /**
+             * Создает элемент карты
+             */
+            createCardElement(index) {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'card';
+                cardElement.dataset.index = index;
+                return cardElement;
+            }
+
+            /**
+             * Создает лицевую сторону карты
+             */
+            createCardFront(imageUrl) {
+                const cardFront = document.createElement('div');
+                cardFront.className = 'card-front';
+                cardFront.style.backgroundImage = `url('${imageUrl}')`;
+                return cardFront;
+            }
+
+            /**
+             * Создает обратную сторону карты
+             */
+            createCardBack() {
+                const cardBack = document.createElement('div');
+                cardBack.className = 'card-back';
+                return cardBack;
+            }
+
+            /**
+             * Обработчик клика на карту
+             */
+            handleCardClick(card, wrapper) {
+                if (!card.classList.contains('flipped') && this.clickCount < CONFIG.SELECT_CARDS) {
+                    card.classList.add('flipped');
+                    this.clickCount++;
+
+                    setTimeout(() => {
+                        card.classList.add('card-flipped-glow');
+                    }, CONFIG.FLIP_DELAY);
+
+                    this.selectedCardsList.push({card, wrapper});
+
+                    if (this.clickCount === CONFIG.SELECT_CARDS) {
+                        this.promptElement.classList.add('fade-out');
                         setTimeout(() => {
-                            card.classList.add('card-flipped-glow');
-                        }, 300);
-
-                        selectedCardsList.push({card, wrapper});
-
-                        if (clickCount === 3) {
-                            // Плавно скрываем надпись
-                            promptElement.classList.add('fade-out');
-
-                            setTimeout(() => {
-                                moveSelectedCards(selectedCardsList);
-                            }, 500);
-                        }
+                            this.moveSelectedCards();
+                        }, CONFIG.PROMPT_FADE_DELAY);
                     }
                 }
+            }
 
-                function moveSelectedCards(cards) {
-                    // Скрываем невыбранные карты
-                    const allWrappers = document.querySelectorAll('.card-wrapper');
-                    allWrappers.forEach(wrapper => {
-                        if (!cards.some(c => c.wrapper === wrapper)) {
-                            wrapper.style.opacity = '0';
-                        }
-                    });
+            /**
+             * Перемещает выбранные карты в ряд
+             */
+            moveSelectedCards() {
+                this.hideUnselectedCards();
+                this.prepareTargetSlots();
+                this.animateCardsMovement();
+            }
 
-                    const targetWrappers = document.querySelectorAll('.selected-card-wrapper');
-
-                    // Сначала скрываем все целевые позиции
-                    targetWrappers.forEach(wrapper => {
+            /**
+             * Скрывает невыбранные карты
+             */
+            hideUnselectedCards() {
+                const allWrappers = document.querySelectorAll('.card-wrapper');
+                allWrappers.forEach(wrapper => {
+                    if (!this.selectedCardsList.some(c => c.wrapper === wrapper)) {
                         wrapper.style.opacity = '0';
-                        wrapper.innerHTML = '';
-                    });
+                    }
+                });
+            }
 
-                    cards.forEach(({card, wrapper}, index) => {
-                        const targetWrapper = targetWrappers[index];
-                        const cardRect = card.getBoundingClientRect();
-                        const targetRect = targetWrapper.getBoundingClientRect();
+            /**
+             * Подготавливает слоты для выбранных карт
+             */
+            prepareTargetSlots() {
+                const targetWrappers = document.querySelectorAll('.selected-card-wrapper');
+                targetWrappers.forEach(wrapper => {
+                    wrapper.style.opacity = '0';
+                    wrapper.innerHTML = '';
+                });
+            }
 
-                        // Создаем летающую карту
-                        const flyingCard = card.cloneNode(true);
-                        flyingCard.className = 'card flipped card-flipped-glow flying-card';
-                        flyingCard.style.width = `${cardRect.width}px`;
-                        flyingCard.style.height = `${cardRect.height}px`;
-                        flyingCard.style.left = `${cardRect.left}px`;
-                        flyingCard.style.top = `${cardRect.top}px`;
-                        document.body.appendChild(flyingCard);
+            /**
+             * Анимирует перемещение карт
+             */
+            animateCardsMovement() {
+                this.selectedCardsList.forEach(({card, wrapper}, index) => {
+                    const targetWrapper = document.querySelectorAll('.selected-card-wrapper')[index];
+                    const cardRect = card.getBoundingClientRect();
+                    const targetRect = targetWrapper.getBoundingClientRect();
 
-                        // Скрываем оригинальную карту
-                        wrapper.style.opacity = '0';
+                    // Создаем летающую карту для анимации
+                    const flyingCard = this.createFlyingCard(card, cardRect);
+                    document.body.appendChild(flyingCard);
 
-                        // Анимация движения
-                        setTimeout(() => {
-                            flyingCard.style.left = `${targetRect.left}px`;
-                            flyingCard.style.top = `${targetRect.top}px`;
-                            flyingCard.style.width = `${targetRect.width}px`;
-                            flyingCard.style.height = `${targetRect.height}px`;
+                    // Скрываем оригинальную карту
+                    wrapper.style.opacity = '0';
 
-                            // После завершения анимации
-                            setTimeout(() => {
-                                // Удаляем летающую карту
+                    // Запускаем анимацию перемещения
+                    setTimeout(() => {
+                        this.animateCardMovement(flyingCard, targetRect, targetWrapper, card);
+                    }, CONFIG.CARD_MOVE_DELAY);
+                });
+            }
 
+            /**
+             * Создает карту для анимации перемещения
+             */
+            createFlyingCard(card, cardRect) {
+                const flyingCard = card.cloneNode(true);
+                flyingCard.className = 'card flipped card-flipped-glow flying-card';
+                flyingCard.style.width = `${cardRect.width}px`;
+                flyingCard.style.height = `${cardRect.height}px`;
+                flyingCard.style.left = `${cardRect.left}px`;
+                flyingCard.style.top = `${cardRect.top}px`;
+                return flyingCard;
+            }
 
-                                // Создаем финальную карту в целевом положении
-                                const finalCard = card.cloneNode(true);
-                                finalCard.className = 'card flipped card-flipped-glow';
-                                targetWrapper.appendChild(finalCard);
-                                targetWrapper.style.opacity = '1';
-                            }, 5000); // Должно совпадать с длительностью анимации
-                        }, 100);
-                        wrapper.style.opacity = '0';
-                    });
+            /**
+             * Анимирует перемещение карты в целевой слот
+             */
+            animateCardMovement(flyingCard, targetRect, targetWrapper, originalCard) {
+                flyingCard.style.left = `${targetRect.left}px`;
+                flyingCard.style.top = `${targetRect.top}px`;
+                flyingCard.style.width = `${targetRect.width}px`;
+                flyingCard.style.height = `${targetRect.height}px`;
+
+                // После завершения анимации
+                setTimeout(() => {
+                    this.finalizeCardMovement(flyingCard, targetWrapper, originalCard);
+                }, 750);
+            }
+
+            /**
+             * Завершает перемещение карты
+             */
+            finalizeCardMovement(targetWrapper, originalCard) {
+
+                // Создаем финальную карту в целевом положении
+                const finalCard = originalCard.cloneNode(true);
+                finalCard.className = 'card flipped card-flipped-glow';
+                targetWrapper.appendChild(finalCard);
+                targetWrapper.style.opacity = '1';
+
+                this.animationCompleteCount++;
+
+                // Показываем кнопку после перемещения всех карт
+                if (this.animationCompleteCount === CONFIG.SELECT_CARDS) {
+                    setTimeout(() => {
+                        this.showFateButton();
+                    }, CONFIG.BUTTON_SHOW_DELAY);
                 }
+            }
 
-                function getRandomCards(cards, count) {
-                    const shuffled = cards.sort(() => Math.random() - 0.5);
-                    return shuffled.slice(0, count);
-                }
-            })
-            .catch(error => console.error('Ошибка загрузки JSON:', error));
+            /**
+             * Показывает кнопку "Узнать предначертанное"
+             */
+            showFateButton() {
+                this.fateButton.classList.add('visible', 'animate');
+            }
+
+            /**
+             * Настраивает обработчик клика на кнопку
+             */
+            setupButtonHandler() {
+                this.fateButton.addEventListener('click', () => {
+                    alert('Ваше предначертание раскрывается...');
+                    // Здесь можно добавить логику для показа результатов
+                });
+            }
+
+            /**
+             * Возвращает случайные карты из колоды
+             */
+            getRandomCards(cards, count) {
+                const shuffled = [...cards].sort(() => Math.random() - 0.5);
+                return shuffled.slice(0, count);
+            }
+        }
     </script>
 </body>
 </html>
