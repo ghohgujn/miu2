@@ -35,7 +35,7 @@
             transition: opacity 0.5s ease;
         }
 
-        /* Анимация исчезновения надписи */
+        /* Анимация исчезновения <н</н>адписи */
         .prompt.fade-out {
             opacity: 0;
         }
@@ -132,7 +132,7 @@
         .flying-card {
             position: fixed;
             z-index: 100;
-            transition: all 1.12s cubic-bezier(0,1.08,.9,1.11); /* https://cubic-bezier.com/#.2,.8,.4,1 /*
+            transition: all 1s cubic-bezier(.8,.86,.4,1); /* https://cubic-bezier.com/#.2,.8,.4,1 /*
             transform-origin: center;
             pointer-events: none;
         }
@@ -255,7 +255,7 @@
                             // После завершения анимации
                             setTimeout(() => {
                                 // Удаляем летающую карту
-                                flyingCard.remove();
+
 
                                 // Создаем финальную карту в целевом положении
                                 const finalCard = card.cloneNode(true);
