@@ -30,6 +30,14 @@
             padding: 0;
         }
 
+        /* Остальные стили остаются БЕЗ ИЗМЕНЕНИЙ */
+        /* Базовые сбросы стилей */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         /* Стили для текстовой подсказки */
         .prompt {
             color: white;
@@ -50,6 +58,8 @@
             width: 90%;
             max-width: 600px;
             margin-bottom: 20px;
+            max-height: calc(var(--tg-viewport-stable-height) - 300px);
+            overflow-y: auto;
         }
 
         /* Обертка для карты */
@@ -235,14 +245,14 @@
                     window.addEventListener('resize', this.updateViewport.bind(this));
                 }
 
-                // 2. Инициализация компонентов приложения (без изменений)
+                // 2. Инициализация компонентов приложения
                 this.setupSelectedCardSlots();
                 this.renderCards();
                 this.setupButtonHandler();
             }
 
             /**
-             * Инициализация Telegram WebApp (обновленный метод)
+             * Инициализация Telegram WebApp
              */
             initTelegramWebApp() {
                 try {
@@ -484,9 +494,9 @@
                 flyingCard.style.width = `${targetRect.width}px`;
                 flyingCard.style.height = `${targetRect.height}px`;
 
-                // После завершения анимации
+                // После завершения анимации (редачить)
                 setTimeout(() => {
-                    this.finalizeCardMovement(flyingCard, targetWrapper, originalCard);
+                    this.finalizeCardMovement(targetWrapper, originalCard);
                 }, 750);
             }
 
@@ -494,7 +504,6 @@
              * Завершает перемещение карты
              */
             finalizeCardMovement(targetWrapper, originalCard) {
-
                 // Создаем финальную карту в целевом положении
                 const finalCard = originalCard.cloneNode(true);
                 finalCard.className = 'card flipped card-flipped-glow';
@@ -507,6 +516,10 @@
                 if (this.animationCompleteCount === CONFIG.SELECT_CARDS) {
                     setTimeout(() => {
                         this.showFateButton();
+                        // Прокручиваем к кнопке после анимации
+                        setTimeout(() => {
+                            this.fateButton.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                        }, 100);
                     }, CONFIG.BUTTON_SHOW_DELAY);
                 }
             }
