@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Гадание на картах Таро</title>
+
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
     <style>
         /* Базовые сбросы стилей */
         * {
@@ -183,21 +185,20 @@
             CARD_MOVE_DELAY: 100,  // Задержка перед началом движения карты (мс)
             BUTTON_SHOW_DELAY: 300 // Задержка перед показом кнопки (мс)
         };
-        // окошко на всю ивановскую
-        window.addEventListener('DOMContentLoaded', () => {
-          if (window.Telegram && window.Telegram.WebApp) {
-            Telegram.WebApp.expand();
-          }
-        });
 
-        // Основная функция инициализации
+        // Инициализация при полной загрузке DOM
         document.addEventListener('DOMContentLoaded', () => {
+            if (window.Telegram && window.Telegram.WebApp) {
+                console.log('Telegram.WebApp доступен');
+                Telegram.WebApp.expand();                        // Раскрываем на весь экран
+                Telegram.WebApp.enableClosingConfirmation();     // Включаем подтверждение закрытия (по желанию)
+            } else {
+                console.warn('Telegram.WebApp недоступен');
+            }
+
             initTarotApp();
         });
 
-        /**
-         * Инициализация приложения
-         */
         function initTarotApp() {
             fetch('card/cards_path.json')
                 .then(response => response.json())
@@ -231,11 +232,8 @@
                 this.setupSelectedCardSlots();
                 this.renderCards();
                 this.setupButtonHandler();
-                if (window.Telegram && window.Telegram.WebApp) {
-                    Telegram.WebApp.expand(); // Раскрываем на весь экран
-                    Telegram.WebApp.enableClosingConfirmation(); // Опционально: включить подтверждение закрытия
             }
-        }
+
 
             /**
              * Создает слоты для выбранных карт
