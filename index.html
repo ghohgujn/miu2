@@ -2,8 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <!-- Обновленный viewport для Telegram WebApp -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Гадание на картах Таро</title>
     <style>
         /* Добавленные CSS переменные для Telegram */
@@ -30,14 +29,6 @@
             padding: 0;
         }
 
-        /* Остальные стили остаются БЕЗ ИЗМЕНЕНИЙ */
-        /* Базовые сбросы стилей */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         /* Стили для текстовой подсказки */
         .prompt {
             color: white;
@@ -58,8 +49,6 @@
             width: 90%;
             max-width: 600px;
             margin-bottom: 20px;
-            max-height: calc(var(--tg-viewport-stable-height) - 300px);
-            overflow-y: auto;
         }
 
         /* Обертка для карты */
@@ -245,21 +234,21 @@
                     window.addEventListener('resize', this.updateViewport.bind(this));
                 }
 
-                // 2. Инициализация компонентов приложения
+                // 2. Инициализация компонентов приложения (без изменений)
                 this.setupSelectedCardSlots();
                 this.renderCards();
                 this.setupButtonHandler();
             }
 
             /**
-             * Инициализация Telegram WebApp
+             * Инициализация Telegram WebApp (обновленный метод)
              */
             initTelegramWebApp() {
                 try {
                     Telegram.WebApp.ready();
 
                     // Первичное расширение
-                    this.expandWebApp();
+                    tg.expand();
 
                     // Сохраняем начальную высоту
                     this.viewportStableHeight = Telegram.WebApp.viewportStableHeight;
@@ -274,34 +263,13 @@
 
                         // Если свернули - пытаемся снова развернуть
                         if (!Telegram.WebApp.isExpanded) {
-                            this.expandWebApp();
+                            tg.expand();
                         }
                     });
 
-                    // Дополнительная проверка через секунду
-                    setTimeout(() => {
-                        if (!Telegram.WebApp.isExpanded) {
-                            this.expandWebApp();
-                        }
-                        this.updateViewport();
-                    }, 1000);
 
                 } catch (e) {
                     console.error('Ошибка инициализации WebApp:', e);
-                }
-            }
-
-            /**
-             * Безопасное расширение WebApp
-             */
-            expandWebApp() {
-                if (Telegram.WebApp && !Telegram.WebApp.isExpanded) {
-                    try {
-                        Telegram.WebApp.expand();
-                        this.isExpanded = true;
-                    } catch (e) {
-                        console.warn('Не удалось развернуть WebApp:', e);
-                    }
                 }
             }
 
@@ -494,9 +462,9 @@
                 flyingCard.style.width = `${targetRect.width}px`;
                 flyingCard.style.height = `${targetRect.height}px`;
 
-                // После завершения анимации (редачить)
+                // После завершения анимации
                 setTimeout(() => {
-                    this.finalizeCardMovement(targetWrapper, originalCard);
+                    this.finalizeCardMovement(flyingCard, targetWrapper, originalCard);
                 }, 750);
             }
 
@@ -504,6 +472,7 @@
              * Завершает перемещение карты
              */
             finalizeCardMovement(targetWrapper, originalCard) {
+
                 // Создаем финальную карту в целевом положении
                 const finalCard = originalCard.cloneNode(true);
                 finalCard.className = 'card flipped card-flipped-glow';
@@ -516,10 +485,6 @@
                 if (this.animationCompleteCount === CONFIG.SELECT_CARDS) {
                     setTimeout(() => {
                         this.showFateButton();
-                        // Прокручиваем к кнопке после анимации
-                        setTimeout(() => {
-                            this.fateButton.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                        }, 100);
                     }, CONFIG.BUTTON_SHOW_DELAY);
                 }
             }
