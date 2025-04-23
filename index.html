@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Гадание на картах Таро</title>
 
+    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
@@ -29,6 +30,30 @@
             background-image: url('card/back.gif');
             background-size: cover;
             background-position: center;
+        }
+
+                /* Прелоадер: фон и надпись */
+        #preloader {
+          position: fixed;
+          z-index: 9999;
+          background-color: rgba(0, 0, 0, 0.85);
+          color: white;
+          font-size: 1.5rem;
+          font-weight: bold;
+          width: 100%;
+          height: 100%;
+          top: 0;
+          left: 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+
+        /* Анимация исчезновения */
+        #preloader.fade-out {
+          opacity: 0;
+          visibility: hidden;
         }
 
         /* Стили для текстовой подсказки */
@@ -169,11 +194,17 @@
     </style>
 </head>
 <body>
+    <!-- Прелоадер -->
+    <div id="preloader">
+        <div class="preloader-text">🔮 Подключаемся к вселенной...</div>
+    </div>
     <!-- Элементы интерфейса -->
     <div class="prompt" id="prompt">Выберите 3 карты</div>
     <div class="card-container" id="card-container"></div>
     <div class="selected-row" id="selected-row"></div>
     <button class="bubbly-button" id="fateButton">🔮Узнать предначертанное🔮</button>
+
+
 
     <script>
         // Конфигурация приложения
@@ -197,6 +228,16 @@
             }
 
             initTarotApp();
+        });
+
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            preloader.classList.add('fade-out');
+
+            // Дополнительно можно убрать элемент совсем после анимации:
+            setTimeout(() => {
+                preloader.remove();
+            }, 700); // чуть больше, чем transition
         });
 
         function initTarotApp() {
