@@ -231,13 +231,13 @@
         window.addEventListener('load', () => {
           const preloader = document.getElementById('preloader');
 
-        // Делаем минимальную задержку — 2 секунды
+        // Делаем минимальную задержку — n секунды
           setTimeout(() => {
             preloader.classList.add('fade-out');
             setTimeout(() => {
               preloader.remove();
             }, 600); // подождать завершения анимации скрытия
-          }, 3500); // ⏳ показываем минимум 2 секунды
+          }, 3000); // ⏳ показываем минимум 2 секунды
         });
 
         // Инициализация при полной загрузке DOM
