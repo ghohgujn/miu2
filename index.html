@@ -32,16 +32,12 @@
             background-position: center;
         }
 
-                /* Прелоадер: фон и надпись */
         #preloader {
           position: fixed;
           z-index: 9999;
-          background-color: rgba(0, 0, 0, 0.85);
-          color: white;
-          font-size: 1.5rem;
-          font-weight: bold;
-          width: 100%;
-          height: 100%;
+          background-color: black;
+          width: 100vw;
+          height: 100vh;
           top: 0;
           left: 0;
           display: flex;
@@ -50,23 +46,27 @@
           transition: opacity 0.6s ease, visibility 0.6s ease;
         }
 
-        /* Анимация исчезновения */
         #preloader.fade-out {
           opacity: 0;
           visibility: hidden;
         }
 
-         .preloader-image {
-              max-width: 80%;
-              max-height: 80%;
-              object-fit: contain;
-              animation: pulse 2s infinite ease-in-out;
+        .preloader-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover; /* Растянуть, сохранив пропорции */
         }
-
-        @keyframes pulse {
-          0%, 100% { opacity: 0.9; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.05); }
-        }
+<!--        мейби надпись-->
+<!--        .preloader-text {-->
+<!--          z-index: 2;-->
+<!--          color: white;-->
+<!--          font-size: 1.8rem;-->
+<!--          font-weight: bold;-->
+<!--          text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);-->
+<!--          padding: 20px;-->
+<!--          background: rgba(0, 0, 0, 0.4);-->
+<!--          border-radius: 10px;-->
+<!--        }-->
         /* Стили для текстовой подсказки */
         .prompt {
             color: white;
@@ -207,7 +207,7 @@
 <body>
     <!-- Прелоадер -->
     <div id="preloader">
-        <img src="media/preloader.gif" alt="Подключаемся к вселенной..." class="preloader-image">
+      <img src="card/preloader.gif" alt="Загрузка..." class="preloader-image">
     </div>
     <!-- Элементы интерфейса -->
     <div class="prompt" id="prompt">Выберите 3 карты</div>
@@ -241,15 +241,17 @@
             initTarotApp();
         });
 
-        window.addEventListener('load', () => {
-            const preloader = document.getElementById('preloader');
-            preloader.classList.add('fade-out');
+      window.addEventListener('load', () => {
+        const preloader = document.getElementById('preloader');
 
-            // Дополнительно можно убрать элемент совсем после анимации:
-            setTimeout(() => {
-                preloader.remove();
-            }, 700); // чуть больше, чем transition
-        });
+        // Делаем минимальную задержку — 2 секунды
+        setTimeout(() => {
+          preloader.classList.add('fade-out');
+          setTimeout(() => {
+            preloader.remove();
+          }, 600); // подождать завершения анимации скрытия
+        }, 4000); // ⏳ показываем минимум 2 секунды
+      });
 
         function initTarotApp() {
             fetch('card/cards_path.json')
@@ -300,7 +302,7 @@
             }
 
             /**
-             * Рендерит карты на странице
+             * цРендерит карты на странице
              */
             renderCards() {
                 const selectedCards = this.getRandomCards(this.cardsData, CONFIG.TOTAL_CARDS);
