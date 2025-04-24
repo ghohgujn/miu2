@@ -56,6 +56,17 @@
           visibility: hidden;
         }
 
+         .preloader-image {
+              max-width: 80%;
+              max-height: 80%;
+              object-fit: contain;
+              animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 0.9; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.05); }
+        }
         /* Стили для текстовой подсказки */
         .prompt {
             color: white;
@@ -196,7 +207,7 @@
 <body>
     <!-- Прелоадер -->
     <div id="preloader">
-        <div class="preloader-text">🔮 Подключаемся к вселенной...</div>
+        <img src="media/preloader.gif" alt="Подключаемся к вселенной..." class="preloader-image">
     </div>
     <!-- Элементы интерфейса -->
     <div class="prompt" id="prompt">Выберите 3 карты</div>
