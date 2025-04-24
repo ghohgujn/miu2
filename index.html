@@ -228,6 +228,18 @@
             BUTTON_SHOW_DELAY: 300 // Задержка перед показом кнопки (мс)
         };
 
+        window.addEventListener('load', () => {
+          const preloader = document.getElementById('preloader');
+
+        // Делаем минимальную задержку — 2 секунды
+          setTimeout(() => {
+            preloader.classList.add('fade-out');
+            setTimeout(() => {
+              preloader.remove();
+            }, 600); // подождать завершения анимации скрытия
+          }, 3000); // ⏳ показываем минимум 2 секунды
+        });
+
         // Инициализация при полной загрузке DOM
         document.addEventListener('DOMContentLoaded', () => {
             if (window.Telegram && window.Telegram.WebApp) {
@@ -240,18 +252,6 @@
 
             initTarotApp();
         });
-
-      window.addEventListener('load', () => {
-        const preloader = document.getElementById('preloader');
-
-        // Делаем минимальную задержку — 2 секунды
-        setTimeout(() => {
-          preloader.classList.add('fade-out');
-          setTimeout(() => {
-            preloader.remove();
-          }, 600); // подождать завершения анимации скрытия
-        }, 4000); // ⏳ показываем минимум 2 секунды
-      });
 
         function initTarotApp() {
             fetch('card/cards_path.json')
